@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lavington Build — Nova</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: Georgia, 'Times New Roman', serif;
+    background: #F5F2EE;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 16px;
+  }
+
+  @keyframes dot-pulse {
+    0%, 100% { opacity: 0.25; transform: scale(0.75); }
+    50% { opacity: 1; transform: scale(1); }
+  }
+  @keyframes slide-up {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .wrap { width: 100%; max-width: 520px; }
+
+  .header {
+    display: flex; align-items: center; gap: 14px; margin-bottom: 18px;
+  }
+  .header-icon {
+    width: 46px; height: 46px; border-radius: 12px;
+    background: #2C2416;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .header-title { font-size: 18px; font-weight: 600; color: #1A1410; letter-spacing: -0.01em; }
+  .header-sub { font-size: 11px; color: #9A8A72; font-family: sans-serif; letter-spacing: 0.04em; margin-top: 2px; }
+  .online-dot { width: 7px; height: 7px; border-radius: 50%; background: #5A9E6F; }
+  .online-label { font-size: 12px; color: #9A8A72; font-family: sans-serif; }
+
+  .chat-box {
+    background: #fff;
+    border: 1px solid #E5DFD5;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 4px 24px rgba(44,36,22,0.08);
+  }
+
+  .messages {
+    height: 380px; overflow-y: auto;
+    padding: 20px 18px 10px;
+  }
+  .messages::-webkit-scrollbar { width: 4px; }
+  .messages::-webkit-scrollbar-thumb { background: #DDD8D0; border-radius: 2px; }
+
+  .welcome-msg {
+    display: flex; gap: 10px; margin-bottom: 18px;
+  }
+  .avatar {
+    width: 30px; height: 30px; border-radius: 8px; background: #2C2416;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; color: #C8A96E; font-weight: 600;
+    font-family: sans-serif; flex-shrink: 0;
+  }
+  .bubble-nova {
+    background: #FAF7F3; border: 1px solid #EDE8DF;
+    border-radius: 4px 14px 14px 14px;
+    padding: 11px 14px; font-size: 14px; color: #3A2E20;
+    line-height: 1.65; max-width: 85%;
+  }
+  .bubble-user {
+    background: #2C2416; color: #F5F0E8;
+    border-radius: 14px 14px 4px 14px;
+    padding: 11px 14px; font-size: 14px;
+    line-height: 1.65; max-width: 80%;
+    font-family: sans-serif;
+  }
+
+  .msg-row { display: flex; gap: 10px; margin-bottom: 14px; align-items: flex-end; }
+  .msg-row.user { flex-direction: row-reverse; }
+  .msg-row { animation: slide-up 0.22s ease forwards; }
+
+  .chips-label { font-size: 11px; color: #B0A090; font-family: sans-serif; margin-bottom: 8px; letter-spacing: 0.03em; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; padding-left: 40px; }
+  .chip {
+    background: transparent; border: 1px solid #DDD8D0; color: #6A5A46;
+    font-size: 12px; padding: 6px 13px; border-radius: 20px;
+    font-family: sans-serif; cursor: pointer; transition: all .15s;
+  }
+  .chip:hover { background: #2C2416; color: #F5F2EE; border-color: #2C2416; }
+
+  .dot-wrap { display: flex; gap: 5px; align-items: center; padding: 3px 0; }
+  .dot {
+    width: 7px; height: 7px; border-radius: 50%; background: #C8A96E;
+    animation: dot-pulse 1.4s ease-in-out infinite;
+  }
+
+  .divider { height: 1px; background: #EDE8DF; }
+
+  .input-row {
+    display: flex; gap: 10px; align-items: flex-end;
+    padding: 13px 15px; background: #FDFCFA;
+  }
+  textarea {
+    flex: 1; background: #F5F2EE; border: 1px solid #E5DFD5;
+    border-radius: 10px; color: #3A2E20; font-size: 14px;
+    padding: 10px 13px; font-family: sans-serif; line-height: 1.5;
+    resize: none; outline: none; transition: border-color .15s, box-shadow .15s;
+  }
+  textarea:focus { border-color: #C8A96E; box-shadow: 0 0 0 3px rgba(200,169,110,0.15); }
+  .send-btn {
+    width: 40px; height: 40px; border-radius: 10px; border: none;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: background .15s; flex-shrink: 0;
+  }
+  .send-btn.active { background: #2C2416; }
+  .send-btn.active:hover { background: #4A3820; }
+  .send-btn.inactive { background: #EDE8DF; cursor: default; }
+
+  .footer {
+    text-align: center; padding: 8px 16px 13px;
+    background: #FDFCFA; border-top: 1px solid #F0EBE3;
+    font-size: 11px; color: #C8C0B4; font-family: sans-serif; letter-spacing: 0.06em;
+  }
+  .footer span { color: #A89880; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="header">
+    <div class="header-icon">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#C8A96E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+    </div>
+    <div>
+      <div class="header-title">Lavington Build</div>
+      <div class="header-sub">Extensions · Renovations · Smart Homes</div>
+    </div>
+    <div style="margin-left:auto;display:flex;align-items:center;gap:6px;">
+      <div class="online-dot"></div>
+      <span class="online-label">Nova online</span>
+    </div>
+  </div>
+
+  <div class="chat-box">
+    <div class="messages" id="messages">
+      <div class="welcome-msg">
+        <div class="avatar">N</div>
+        <div class="bubble-nova">
+          Hi there — I'm Nova, Lavington Build's assistant. Whether you're thinking about an extension, a kitchen renovation, a smart home upgrade, or something else entirely, I'm here to help point you in the right direction.
+        </div>
+      </div>
+      <div style="padding-left:40px;margin-bottom:4px;" class="chips-label">Common questions</div>
+      <div class="chips" id="chips">
+        <button class="chip" onclick="sendChip(this)">I'd like a rear extension quote</button>
+        <button class="chip" onclick="sendChip(this)">What is microcement?</button>
+        <button class="chip" onclick="sendChip(this)">Can you do smart home installation?</button>
+        <button class="chip" onclick="sendChip(this)">How do I get started?</button>
+        <button class="chip" onclick="sendChip(this)">Do you do loft conversions?</button>
+        <button class="chip" onclick="sendChip(this)">What commercial work do you do?</button>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="input-row">
+      <textarea id="input" rows="1" placeholder="Ask about extensions, renovations, smart homes…"
+        onkeydown="handleKey(event)" oninput="updateBtn()"></textarea>
+      <button class="send-btn inactive" id="send-btn" onclick="sendMessage()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C0B8AC" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" id="send-icon">
+          <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="footer">POWERED BY <span>DIGITAL EIGHT</span> AI</div>
+  </div>
+</div>
+
+<script>
+const SYSTEM = `You are Nova, the AI assistant for Lavington Build — a certified residential and commercial building company delivering high-quality construction services.
+
+ABOUT LAVINGTON BUILD:
+Website: lavingtonbuild.co.uk | Phone: 07770 555828
+Lavington Build works on projects of all sizes — from small repairs and upgrades to full property transformations. They work with architectural partners, interior designers, and specialist trades from planning through to final finish.
+
+SERVICES:
+Residential: home extensions (rear/side/wraparound/loft conversions), internal refurbishments, kitchen and bathroom upgrades, structural alterations, flooring, tiling, decorating, property repairs.
+Commercial: shop and office fit-outs, commercial refurbishments, lighting and electrical improvements, air conditioning, feature walls and microcement finishes.
+Microcement & Specialist Finishes: seamless waterproof surface for floors, walls, bathrooms, kitchens. Modern, no-grout look. Popular in wet rooms and hospitality interiors.
+Smart Home: smart lighting, automated blinds, built-in audio and multi-room systems, smart climate control, voice-controlled features — can be added to any renovation from the start.
+Certified Works: gas, electrical, air conditioning — all by certified professionals, coordinated in-house.
+External Works: paving, patios, external repairs, garden construction, practical landscaping.
+Design Support: architectural input, elevation drawings, planning support, trade coordination, interior design collaboration.
+
+PROCESS: Initial enquiry → free site visit → detailed quote → scheduled works → delivery → handover.
+TO ENQUIRE: Call 07770 555828 or visit lavingtonbuild.co.uk/contact
+
+RULES:
+- Warm, professional, confident tone — talking to homeowners and business owners
+- 2–4 sentences max per response
+- Never invent prices — always direct to free site visit for quotes
+- If someone mentions a specific project, ask one clarifying question to show genuine interest
+- If someone is ready to enquire, take their name and contact number — tell them team will call within 1 working day
+- No bullet points — natural flowing sentences only
+- End with a brief, natural offer to help further`;
+
+let messages = [];
+let loading = false;
+
+function updateBtn() {
+  const val = document.getElementById('input').value.trim();
+  const btn = document.getElementById('send-btn');
+  const icon = document.getElementById('send-icon');
+  if (val && !loading) {
+    btn.className = 'send-btn active';
+    icon.setAttribute('stroke', '#C8A96E');
+  } else {
+    btn.className = 'send-btn inactive';
+    icon.setAttribute('stroke', '#C0B8AC');
+  }
+}
+
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+}
+
+function sendChip(el) {
+  document.getElementById('chips')?.closest('.welcome-msg + *')?.remove();
+  document.getElementById('chips')?.parentElement?.remove();
+  sendMessage(el.textContent);
+}
+
+function appendMsg(role, text) {
+  const box = document.getElementById('messages');
+  const row = document.createElement('div');
+  row.className = 'msg-row' + (role === 'user' ? ' user' : '');
+
+  if (role === 'assistant') {
+    const av = document.createElement('div');
+    av.className = 'avatar'; av.textContent = 'N';
+    row.appendChild(av);
+  }
+
+  const bub = document.createElement('div');
+  bub.className = role === 'user' ? 'bubble-user' : 'bubble-nova';
+  bub.textContent = text;
+  row.appendChild(bub);
+
+  box.appendChild(row);
+  box.scrollTop = box.scrollHeight;
+  return row;
+}
+
+function showTyping() {
+  const box = document.getElementById('messages');
+  const row = document.createElement('div');
+  row.className = 'msg-row'; row.id = 'typing-row';
+  const av = document.createElement('div');
+  av.className = 'avatar'; av.textContent = 'N';
+  row.appendChild(av);
+  const bub = document.createElement('div');
+  bub.className = 'bubble-nova';
+  bub.innerHTML = '<div class="dot-wrap"><div class="dot" style="animation-delay:0s"></div><div class="dot" style="animation-delay:.16s"></div><div class="dot" style="animation-delay:.32s"></div></div>';
+  row.appendChild(bub);
+  box.appendChild(row);
+  box.scrollTop = box.scrollHeight;
+}
+
+function removeTyping() {
+  document.getElementById('typing-row')?.remove();
+}
+
+async function sendMessage(override) {
+  const inp = document.getElementById('input');
+  const text = override || inp.value.trim();
+  if (!text || loading) return;
+  inp.value = ''; updateBtn();
+
+  // Hide chips on first message
+  const chipsSection = document.querySelector('.chips')?.closest('div[style]') || document.querySelector('.chips')?.parentElement;
+  if (chipsSection) {
+    const chipsLabel = document.querySelector('.chips-label');
+    chipsLabel?.remove();
+    chipsSection.remove();
+  }
+
+  messages.push({ role: 'user', content: text });
+  appendMsg('user', text);
+  loading = true; updateBtn();
+  showTyping();
+
+  try {
+    const res = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ messages, system: SYSTEM })
+    });
+    const data = await res.json();
+    const reply = data.content?.[0]?.text || 'Something went wrong — please try again.';
+    removeTyping();
+    messages.push({ role: 'assistant', content: reply });
+    appendMsg('assistant', reply);
+  } catch {
+    removeTyping();
+    appendMsg('assistant', 'Something went wrong — please try again.');
+  }
+
+  loading = false; updateBtn();
+}
+</script>
+</body>
+</html>
