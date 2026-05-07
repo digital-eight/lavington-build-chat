@@ -232,8 +232,8 @@ function handleKey(e) {
 }
 
 function sendChip(el) {
-  document.getElementById('chips')?.closest('.welcome-msg + *')?.remove();
-  document.getElementById('chips')?.parentElement?.remove();
+  document.querySelector('.chips-label')?.remove();
+  document.getElementById('chips')?.remove();
   sendMessage(el.textContent);
 }
 
@@ -284,12 +284,8 @@ async function sendMessage(override) {
   inp.value = ''; updateBtn();
 
   // Hide chips on first message
-  const chipsSection = document.querySelector('.chips')?.closest('div[style]') || document.querySelector('.chips')?.parentElement;
-  if (chipsSection) {
-    const chipsLabel = document.querySelector('.chips-label');
-    chipsLabel?.remove();
-    chipsSection.remove();
-  }
+document.querySelector('.chips-label')?.remove();
+    document.querySelector('.chips')?.remove();  
 
   messages.push({ role: 'user', content: text });
   appendMsg('user', text);
